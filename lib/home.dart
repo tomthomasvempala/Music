@@ -6,6 +6,8 @@ import 'dart:async';
 
 
 enum PlayerState { stopped, playing, paused }
+bool searching = false;
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,6 +17,196 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
+
+Widget nowPlaying(){
+  return 
+                  Scaffold
+                  (
+                    body:Stack(alignment: Alignment.topCenter, children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    Opacity(
+                        opacity: 0.98,
+                        child: Container(
+                            alignment: Alignment.center,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                    alignment: AlignmentDirectional.center,
+                                    height: 500,
+                                    decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: img.image,
+                                            fit: BoxFit.cover))),
+                              ],
+                            ))),
+                    // Opacity(
+                    //     opacity: 0.95,
+                    //     child: Container(
+                    //       color: Colors.black87,
+                    //       height: 80,
+                    //     )),
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    Opacity(
+                        opacity: 1,
+                        child: Container(
+                          height: 500,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                            begin: FractionalOffset.bottomCenter,
+                            end: FractionalOffset.topCenter,
+                            colors: [
+                              Colors.indigo[900],
+                              Colors.indigo[900].withOpacity(0.5)
+                            ],
+                            stops: [0, 1.0],
+                          )),
+                        )),
+                    Expanded(
+                        child: Opacity(
+                            opacity: 1,
+                            child: Container(
+                              color: Colors.indigo[900],
+                            )))
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  //mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        padding: EdgeInsets.all(10),
+                        height: 500,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            //mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(child: SizedBox(height: 344)),
+                              Text(
+                                mocktitle,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Container(
+                                  alignment: Alignment.center,
+                                  width: 300,
+                                  child: Text(
+                                    mockartist,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.white),
+                                  )),
+                            ])),
+                    Slider(
+                        activeColor: tertiaryColor,
+                        inactiveColor: primaryColor,
+                        value: (nowPlayingSlider)/mockduration,
+                        onChanged: (double x) {
+                          setState(() {
+                            var duration = double.parse(songs[i].duration);
+                            duration = duration / 1000;
+                            nowPlayingSlider = x;
+                            audioPlayer.seek(x * duration);
+                          });
+                        }),
+                    Container(
+                      padding: EdgeInsets.only(left: 20,right:20),
+                      child:
+                      Row(
+                      children: <Widget>[
+                        Text(nowPlayingTimerRunning,
+                        style: TextStyle(
+                          color:Colors.white
+                        ),                        
+                        ),
+                        Expanded(child: SizedBox(),),
+                        Text(nowPlayingTimerTotal,
+                        style: TextStyle(
+                          color:Colors.white
+                        ),
+                        )
+                      ],
+                    )
+                    
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FlatButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0)),
+                            child: Icon(Icons.fast_rewind,
+                                color: iconColor, size: 50),
+                            highlightColor: secondaryColor,
+                            splashColor: secondaryColor,
+                            onPressed: () {
+                              setState(() {
+                                i--;
+                                songChanged();
+                              });
+                            }),
+                        SizedBox(width: 10),
+                        Container(
+                            alignment: AlignmentDirectional.topCenter,
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              //shape: BoxShape.circle,
+                              color: tertiaryColor,
+                              borderRadius: BorderRadius.circular(30),
+                              //border: Border.all(color: Colors.white, width: 2)
+                            ),
+                            child: IconButton(
+                                icon: status == "Playing"
+                                    ? Icon(Icons.pause, color: iconColor)
+                                    : Icon(Icons.play_arrow, color: iconColor),
+                                iconSize: 45,
+                                highlightColor: secondaryColor,
+                                onPressed: () {
+                                  setState(() {
+                                    if (status == "Playing") {
+                                      status = "Pause";
+                                      pause();
+                                    } else {
+                                      status = "Playing";
+                                      play(songs[i].filePath);
+                                    }
+                                  });
+                                })),
+                        SizedBox(width: 10),
+                        FlatButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0)),
+                            child: Icon(Icons.fast_forward,
+                                color: iconColor, size: 50),
+                            highlightColor: secondaryColor,
+                            splashColor: secondaryColor,
+                            onPressed: () {
+                              setState(() {
+                                i++;
+                                songChanged();
+
+                              });
+                            }),
+                      ],
+                    )
+                  ],
+                )
+              ]));
+}
+
 
   Widget getArtistsList() {
 
@@ -31,21 +223,21 @@ class _HomeScreen extends State<HomeScreen> {
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   var path = allArtistsImage[index];
-                  Image img;
+                  Image imgaa;
                   if (path == null)
-                    img = Image(
+                    imgaa = Image(
                       image: AssetImage("assets/onthefloor.jpg"),
                       fit: BoxFit.cover,
                     );
                   else {
                     File f = new File(path);
                     if (!f.existsSync()) {
-                      img = Image(
+                      imgaa = Image(
                         image: AssetImage("assets/onthefloor.jpg"),
                         fit: BoxFit.cover,
                       );
                     } else
-                      img = Image.file(
+                      imgaa = Image.file(
                         File(path),
                         fit: BoxFit.cover,
                       );
@@ -67,7 +259,7 @@ class _HomeScreen extends State<HomeScreen> {
                                         color: Colors.white,
                                         fontSize: 16.0,
                                       )),
-                                  background: img),
+                                  background: imgaa),
                             ),
                           ];
                         },
@@ -203,6 +395,7 @@ class _HomeScreen extends State<HomeScreen> {
   Duration position;
   String localFilePath;
   String nowPlayingTimerRunning,nowPlayingTimerTotal;
+  bool showingNowPlaying=false;
   var allSongsList ;
 
   PlayerState playerState = PlayerState.stopped;
@@ -245,7 +438,7 @@ class _HomeScreen extends State<HomeScreen> {
 
     audioPlayer.setPositionHandler((p) => setState(() {
           nowPlayingSlider=p.inMilliseconds.toDouble();
-          print(p.inMilliseconds);  
+          //print(p.inMilliseconds);  
           position = p;
 
           int dur = nowPlayingSlider.ceil();
@@ -347,26 +540,6 @@ class _HomeScreen extends State<HomeScreen> {
       playerState = PlayerState.stopped;
       i++;
       songChanged();
-      // if (i == songs.length) i = 0;
-      // mockpath = songs[i].filePath;
-      // stop();
-      // localFilePath = mockpath;
-      // mockduration = double.parse(songs[i].duration);
-      // _playLocal();
-      // status = "Playing";
-      // mockartist = songs[i].artist;
-      // mocktitle = songs[i].title;
-      // var path = songs[i].albumArtwork;
-      // nowPlayingSlider=0;
-      // if (path == null)
-      //   img = Image(image: AssetImage("assets/onthefloor.jpg"));
-      // else {
-      //   File f = new File(path);
-      //   if (!f.existsSync()) {
-      //     img = Image(image: AssetImage("assets/onthefloor.jpg"));
-      //   } else
-      //     img = Image.file(File(path));
-      // }
     });
   }
 
@@ -393,310 +566,161 @@ class _HomeScreen extends State<HomeScreen> {
     //    }
     //    );
 
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 4,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: secondaryColor,
-          bottom: TabBar(
-            indicatorSize: TabBarIndicatorSize.label,
-            indicatorWeight: 2,
-            labelStyle: TextStyle(fontSize: 16),
-            tabs: [
-              Tab(
-                text: 'NOW',
-              ),
-              Tab(
-                text: 'GENRE',
-              ),
-              Tab(
-                text: 'ARTISTS',
-              ),
-              Tab(
-                text: 'ALL',
-              )
-            ],
-          ),
-          title: Text("Music",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-          centerTitle: false,
-        ),
-        body: Container(
-            color: primaryColor,
-            child: TabBarView(children: [
-              Stack(alignment: Alignment.topCenter, children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Opacity(
-                        opacity: 0.98,
-                        child: Container(
-                            alignment: Alignment.center,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                    alignment: AlignmentDirectional.center,
-                                    height: 400,
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: img.image,
-                                            fit: BoxFit.cover))),
-                              ],
-                            ))),
-                    Opacity(
-                        opacity: 0.95,
-                        child: Container(
-                          color: Colors.black87,
-                          height: 80,
-                        )),
-                  ],
-                ),
-                Column(
-                  children: <Widget>[
-                    Opacity(
-                        opacity: 1,
-                        child: Container(
-                          height: 400,
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                            begin: FractionalOffset.bottomCenter,
-                            end: FractionalOffset.topCenter,
-                            colors: [
-                              Colors.indigo[900],
-                              Colors.indigo[900].withOpacity(0.5)
-                            ],
-                            stops: [0, 1.0],
-                          )),
-                        )),
-                    Expanded(
-                        child: Opacity(
-                            opacity: 1,
-                            child: Container(
-                              color: Colors.indigo[900],
-                            )))
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  //mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                        padding: EdgeInsets.all(10),
-                        height: 400,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            //mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Expanded(child: SizedBox(height: 344)),
-                              Text(
-                                mocktitle,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 27,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Container(
-                                  alignment: Alignment.center,
-                                  width: 300,
-                                  child: Text(
-                                    mockartist,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.white),
-                                  )),
-                            ])),
-                    Slider(
-                        activeColor: tertiaryColor,
-                        inactiveColor: primaryColor,
-                        value: (nowPlayingSlider)/mockduration,
-                        onChanged: (double x) {
-                          setState(() {
-                            var duration = double.parse(songs[i].duration);
-                            duration = duration / 1000;
-                            nowPlayingSlider = x;
-                            audioPlayer.seek(x * duration);
-                          });
-                        }),
-                    Container(
-                      padding: EdgeInsets.only(left: 20,right:20),
-                      child:
-                      Row(
-                      children: <Widget>[
-                        Text(nowPlayingTimerRunning,
-                        style: TextStyle(
-                          color:Colors.white
-                        ),                        
-                        ),
-                        Expanded(child: SizedBox(),),
-                        Text(nowPlayingTimerTotal,
-                        style: TextStyle(
-                          color:Colors.white
-                        ),
-                        )
-                      ],
-                    )
-                    
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(30.0)),
-                            child: Icon(Icons.fast_rewind,
-                                color: iconColor, size: 50),
-                            highlightColor: secondaryColor,
-                            splashColor: secondaryColor,
-                            onPressed: () {
-                              
-                              // if (i == -1) i = songs.length - 1;
-                              // mockpath = songs[i].filePath;
-                              // stop();
-                              // localFilePath = mockpath;
-                              // _playLocal();
-                              setState(() {
-                                i--;
-                                songChanged();
-                                // status = "Playing";
-                                // mockartist = songs[i].artist;
-                                // mocktitle = songs[i].title;
-                                // mockpath = songs[i].filePath;
-                                // mockduration = double.parse(songs[i].duration);
-                                // localFilePath = mockpath;
-                                // _playLocal();
-                                // var path = songs[i].albumArtwork;
-                                // if (path == null)
-                                //   img = Image(
-                                //       image:
-                                //           AssetImage("assets/onthefloor.jpg"));
-                                // else {
-                                //   File f = new File(path);
-                                //   if (!f.existsSync()) {
-                                //     img = Image(
-                                //         image: AssetImage(
-                                //             "assets/onthefloor.jpg"));
-                                //   } else
-                                //     img = Image.file(File(path));
-                                // }
-                              });
-                            }),
-                        SizedBox(width: 10),
-                        Container(
-                            alignment: AlignmentDirectional.topCenter,
-                            height: 60,
-                            width: 60,
-                            decoration: BoxDecoration(
-                              //shape: BoxShape.circle,
-                              color: tertiaryColor,
-                              borderRadius: BorderRadius.circular(30),
-                              //border: Border.all(color: Colors.white, width: 2)
-                            ),
-                            child: IconButton(
-                                icon: status == "Playing"
-                                    ? Icon(Icons.pause, color: iconColor)
-                                    : Icon(Icons.play_arrow, color: iconColor),
-                                iconSize: 45,
-                                highlightColor: secondaryColor,
-                                onPressed: () {
-                                  setState(() {
-                                    if (status == "Playing") {
-                                      status = "Pause";
-                                      pause();
-                                    } else {
-                                      status = "Playing";
-                                      play(songs[i].filePath);
-                                    }
-                                  });
-                                })),
-                        SizedBox(width: 10),
-                        FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(30.0)),
-                            child: Icon(Icons.fast_forward,
-                                color: iconColor, size: 50),
-                            highlightColor: secondaryColor,
-                            splashColor: secondaryColor,
-                            onPressed: () {
-                              // i++;
-                              // if (i == songs.length) i = 0;
-                              // mockpath = songs[i].filePath;
-                              // stop();
-                              // localFilePath = mockpath;
-                              // _playLocal();
-                              setState(() {
-                                i++;
-                                songChanged();
-                                // status = "Playing";
-                                // mockartist = songs[i].artist;
-                                // mocktitle = songs[i].title;
-                                // var path = songs[i].albumArtwork;
-                                // mockduration = double.parse(songs[i].duration);
+      Future <bool> _onBackPressed(){
+        if(showingNowPlaying)
+          {
+            setState(() {
+              showingNowPlaying=false;
+            });
+            return Future.value(false);
+          }
+          else
+            return Future.value(true);
+          
+      }
 
-                                // if (path == null)
-                                //   img = Image(
-                                //       image:
-                                //           AssetImage("assets/onthefloor.jpg"));
-                                // else {
-                                //   File f = new File(path);
-                                //   if (!f.existsSync()) {
-                                //     img = Image(
-                                //         image: AssetImage(
-                                //             "assets/onthefloor.jpg"));
-                                //   } else
-                                //     img = Image.file(File(path));
-                                // }
-                              });
-                            }),
-                      ],
-                    )
-                  ],
+    return 
+      WillPopScope(
+        onWillPop: 
+        _onBackPressed
+        ,
+              child: Stack
+        (children:<Widget>[
+        DefaultTabController(
+        initialIndex: 0,
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: secondaryColor,
+            bottom: TabBar(
+              onTap: (x){
+                setState(() {
+                  allSongsList=getAllSongs("");
+                });
+              },
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorWeight: 2,
+              labelStyle: TextStyle(fontSize: 16),
+              tabs: [
+                Tab(
+                  text: 'GENRE',
+                ),
+                Tab(
+                  text: 'ARTISTS',
+                ),
+                Tab(
+                  text: 'ALL',
                 )
-              ]),
-              ListView(
-                children: <Widget>[],
-              ),
-              Scaffold(
-                  body:
-                      Container(color: primaryColor, child: getArtistsList())),
-              Scaffold(
-                  body: Container(
-                      padding: EdgeInsets.only(right:10,left:10),
-                      color: primaryColor,
-                      child: 
-                        Column(children: <Widget>[
-                          TextField(
-                            style: TextStyle(
-                              color:iconColor
-                            ),
-                            onChanged: (string){
-                              setState(() {
-                                allSongsList=getAllSongs(string);
-                              });
-                            }
-                            ,
-                          ),
-                          Expanded(child: 
-                            ListView(children: allSongsList)
-                          )
-                          
-                        ],)
-                        )),
-            ])),
-        drawer: Container(
-            height: 300,
-            child: Column(
-              children: <Widget>[
-                RaisedButton(child: Text("data"), onPressed: () {})
               ],
-            )),
-      ),
-    );
+            ),
+            title: Text("Music",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            centerTitle: false,
+          ),
+          body: Container(
+              color: primaryColor,
+              child: TabBarView(children: [
+                ListView(
+                  children: <Widget>[],
+                ),
+                Scaffold(
+                    body:
+                        Container(color: primaryColor, child: getArtistsList())),
+                Scaffold(
+                    body: Container(
+                        padding: EdgeInsets.only(right:10,left:10),
+                        color: primaryColor,
+                        child: 
+                          Column(children: <Widget>[
+                            
+                              TextField(
+                              style: TextStyle(
+                                color:iconColor
+                              ),
+                              onChanged: (string){
+                                setState(() {
+
+                                  allSongsList=getAllSongs(string);
+                                });
+                              }
+                              ,
+                            ),
+                            Expanded(child: 
+                              ListView(children: allSongsList
+                            ))
+                            
+                          ],)
+                          )),
+              ])),
+          drawer: Container(
+              height: 700,
+              width: 200,
+              color: primaryColor,
+              child: Column(
+                children: <Widget>[
+                  RaisedButton(child: Text("data"), onPressed: () {})
+                ],
+              )),
+
+          bottomNavigationBar: GestureDetector(
+            onPanUpdate: (details) {
+              if (details.delta.dx > 0) {
+               i--;
+               songChanged();
+              }
+              if (details.delta.dx < -0) {
+               i++;
+               songChanged();
+              }
+            },
+            onTap: (){
+                  setState(() {
+                  //   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  //   return nowPlaying();
+                
+                  // }));
+                  showingNowPlaying=true;
+                  });
+                  
+                },
+                child:
+            SizedBox(
+              height:80,
+                          child: ListTile(
+                
+                  leading: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(image: img.image)),
+                ),
+                title: Text(mocktitle,style: TextStyle(fontSize:20),maxLines: 1,),
+                subtitle: Text(mockartist),
+                trailing: IconButton(icon: status == "Playing"
+                                      ? Icon(Icons.pause)
+                                      : Icon(Icons.play_arrow),
+                                      iconSize: 30,
+                 onPressed: () {
+                                    setState(() {
+                                      if (status == "Playing") {
+                                        status = "Pause";
+                                        pause();
+                                      } else {
+                                        status = "Playing";
+                                        play(songs[i].filePath);
+                                      }
+                                    });
+                                  }),
+                ),
+            ),
+            
+          ),
+        ),
+    ),
+    showingNowPlaying?nowPlaying():Container()
+    
+    ]),
+      );
   }
 }
